@@ -1,0 +1,1832 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Recurso exclusión predios – ANLA</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800;14..32,900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+  <style>
+    /* ----- RESET & BASE ----- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: #0a1628;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      background: linear-gradient(145deg, #0a1628 0%, #142a4a 40%, #1a2a4a 70%, #0f1f3a 100%);
+      background-size: 400% 400%;
+      animation: gradientBg 15s ease infinite alternate;
+      pointer-events: none;
+    }
+
+    @keyframes gradientBg {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    #particles-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+      pointer-events: none;
+      opacity: 0.4;
+    }
+
+    #bubbles-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.6;
+    }
+
+    .bg-wave {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 140px;
+      z-index: 0;
+      pointer-events: none;
+      opacity: 0.06;
+    }
+
+    .presentation-wrapper {
+      width: 100%;
+      max-width: 1300px;
+      background: rgba(255, 255, 255, 0.04);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      border-radius: 48px;
+      padding: 24px 24px 18px;
+      box-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(255, 255, 255, 0.06);
+      position: relative;
+      z-index: 2;
+      border: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .slides-container {
+      position: relative;
+      background: rgba(255, 255, 255, 0.85);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      border-radius: 32px;
+      overflow: hidden;
+      box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.4);
+      min-height: 580px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      transition: box-shadow 0.6s ease;
+    }
+
+    .slides-container:hover {
+      box-shadow: 0 40px 80px -12px rgba(0, 0, 0, 0.6);
+    }
+
+    #transitionOverlay {
+      position: absolute;
+      inset: 0;
+      z-index: 30;
+      pointer-events: none;
+      border-radius: 32px;
+      opacity: 0;
+      transition: opacity 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      background: radial-gradient(circle at center, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 70%);
+      box-shadow: inset 0 0 60px rgba(255,255,255,0.3);
+      display: none;
+    }
+
+    #transitionOverlay.active {
+      display: block;
+      opacity: 1;
+    }
+
+    #transitionOverlay.fade-out {
+      opacity: 0;
+      transition: opacity 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    }
+
+    .slides-track {
+      display: flex;
+      transition: transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      will-change: transform;
+      transform-style: preserve-3d;
+      perspective: 1200px;
+    }
+
+    .slides-track.no-transition {
+      transition: none !important;
+    }
+
+    .slide {
+      flex: 0 0 100%;
+      padding: 38px 44px 44px;
+      min-height: 580px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+      overflow: hidden;
+      transform-style: preserve-3d;
+      transition: background 0.5s ease;
+    }
+
+    .slide::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      z-index: 0;
+      background: radial-gradient(circle at 30% 40%, var(--accent-color-light, rgba(45,155,122,0.08)), transparent 60%),
+                  radial-gradient(circle at 70% 60%, var(--accent-color-light, rgba(45,155,122,0.05)), transparent 50%);
+      animation: gradientShift 8s infinite alternate ease-in-out;
+      pointer-events: none;
+    }
+
+    @keyframes gradientShift {
+      0% { transform: scale(1) rotate(0deg); }
+      100% { transform: scale(1.3) rotate(5deg); }
+    }
+
+    .slide::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      width: 6px;
+      height: 100%;
+      border-radius: 0 4px 4px 0;
+      background: var(--accent-color, #2d9b7a);
+      z-index: 2;
+      box-shadow: 0 0 20px var(--accent-color, #2d9b7a), 0 0 60px var(--accent-color-light, rgba(45,155,122,0.2));
+      animation: neonPulse 3s infinite alternate ease-in-out;
+    }
+
+    @keyframes neonPulse {
+      0% { box-shadow: 0 0 10px var(--accent-color, #2d9b7a), 0 0 30px var(--accent-color-light, rgba(45,155,122,0.1)); }
+      100% { box-shadow: 0 0 30px var(--accent-color, #2d9b7a), 0 0 80px var(--accent-color-light, rgba(45,155,122,0.3)); }
+    }
+
+    .slide .slide-number {
+      position: absolute;
+      bottom: 18px;
+      right: 28px;
+      font-size: 8rem;
+      font-weight: 900;
+      color: rgba(0,0,0,0.02);
+      pointer-events: none;
+      z-index: 0;
+      line-height: 1;
+      letter-spacing: -0.05em;
+      font-family: 'Inter', sans-serif;
+      text-shadow: 0 0 40px rgba(255,255,255,0.1);
+      background: linear-gradient(135deg, rgba(0,0,0,0.01), rgba(0,0,0,0.06));
+      -webkit-background-clip: text;
+      background-clip: text;
+      animation: shimmerNumber 6s infinite linear;
+    }
+
+    @keyframes shimmerNumber {
+      0% { opacity: 0.3; transform: scale(1); }
+      50% { opacity: 0.6; transform: scale(1.02); }
+      100% { opacity: 0.3; transform: scale(1); }
+    }
+
+    .slide-particles {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      overflow: hidden;
+    }
+    .slide-particle {
+      position: absolute;
+      border-radius: 50%;
+      background: var(--accent-color, #2d9b7a);
+      opacity: 0.05;
+      animation: floatParticle 15s infinite alternate ease-in-out;
+      transform-style: preserve-3d;
+      will-change: transform;
+    }
+
+    @keyframes floatParticle {
+      0% { transform: translate(0, 0) scale(1) rotate(0deg); }
+      100% { transform: translate(40px, -30px) scale(1.5) rotate(360deg); }
+    }
+
+    .logo-slide {
+      position: absolute;
+      top: 16px;
+      right: 24px;
+      z-index: 5;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 8px 14px 8px 12px;
+      border-radius: 60px;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+      animation: floatLogo 4s infinite alternate ease-in-out;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      cursor: default;
+      pointer-events: none;
+    }
+
+    .logo-slide:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    @keyframes floatLogo {
+      0% { transform: translateY(0px) scale(1); }
+      100% { transform: translateY(-5px) scale(1.02); }
+    }
+
+    .logo-slide .logo-icon {
+      font-size: 1.4rem;
+      color: #f5b342;
+      filter: drop-shadow(0 2px 8px rgba(245,179,66,0.3));
+      animation: spinBolt 6s infinite linear;
+    }
+
+    @keyframes spinBolt {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .logo-slide .logo-text {
+      display: flex;
+      flex-direction: column;
+      line-height: 1.1;
+    }
+
+    .logo-slide .logo-text .main {
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: #0b1a2e;
+      letter-spacing: 0.04em;
+    }
+
+    .logo-slide .logo-text .sub {
+      font-size: 0.55rem;
+      font-weight: 600;
+      color: #2a4b6b;
+      letter-spacing: 0.03em;
+      opacity: 0.8;
+    }
+
+    .slide-body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      color: #1e2f3f;
+      font-size: 1.05rem;
+      line-height: 1.7;
+      z-index: 1;
+      position: relative;
+      overflow: visible;
+    }
+
+    .slide-body p {
+      margin: 0;
+    }
+
+    .slide-body ul,
+    .slide-body ol {
+      padding-left: 26px;
+      margin: 4px 0;
+    }
+
+    .slide-body li {
+      margin-bottom: 5px;
+    }
+
+    .slide .animate-item {
+      opacity: 0;
+      transform: translateY(20px) scale(0.95) rotateX(3deg);
+      transition: opacity 0.7s cubic-bezier(0.34, 1.56, 0.64, 1), transform 0.7s cubic-bezier(0.34, 1.56, 0.64, 1);
+      position: relative;
+      z-index: 1;
+    }
+
+    .slide.active .animate-item {
+      opacity: 1;
+      transform: translateY(0) scale(1) rotateX(0deg);
+    }
+
+    .slide.active .animate-item:nth-child(1) { transition-delay: 0.05s; }
+    .slide.active .animate-item:nth-child(2) { transition-delay: 0.10s; }
+    .slide.active .animate-item:nth-child(3) { transition-delay: 0.15s; }
+    .slide.active .animate-item:nth-child(4) { transition-delay: 0.20s; }
+    .slide.active .animate-item:nth-child(5) { transition-delay: 0.25s; }
+    .slide.active .animate-item:nth-child(6) { transition-delay: 0.30s; }
+    .slide.active .animate-item:nth-child(7) { transition-delay: 0.35s; }
+    .slide.active .animate-item:nth-child(8) { transition-delay: 0.40s; }
+    .slide.active .animate-item:nth-child(9) { transition-delay: 0.45s; }
+    .slide.active .animate-item:nth-child(10) { transition-delay: 0.50s; }
+
+    .slide-tag {
+      display: inline-block;
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      color: var(--accent-color, #1a6b4f);
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 6px 20px;
+      border-radius: 40px;
+      margin-bottom: 12px;
+      align-self: flex-start;
+      border: 1px solid rgba(255, 255, 255, 0.8);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.04);
+      z-index: 1;
+      transition: all 0.3s ease;
+      flex-shrink: 0;
+    }
+    .slide-tag:hover {
+      transform: scale(1.05);
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+    }
+
+    .slide-icon {
+      font-size: 2.8rem;
+      color: var(--accent-color, #2d9b7a);
+      margin-bottom: 6px;
+      opacity: 0.9;
+      z-index: 1;
+      display: inline-block;
+      animation: floatIcon 5s infinite alternate ease-in-out;
+      filter: drop-shadow(0 4px 12px var(--accent-color-light, rgba(45,155,122,0.2)));
+      transition: transform 0.3s ease;
+      flex-shrink: 0;
+    }
+    .slide-icon:hover {
+      transform: scale(1.15) rotate(-5deg);
+    }
+
+    @keyframes floatIcon {
+      0% { transform: translateY(0px) scale(1); }
+      100% { transform: translateY(-10px) scale(1.05); }
+    }
+
+    .slide-title {
+      font-size: 2.2rem;
+      font-weight: 900;
+      line-height: 1.1;
+      color: #0b1a2e;
+      margin-bottom: 10px;
+      letter-spacing: -0.02em;
+      z-index: 1;
+      position: relative;
+      text-shadow: 0 2px 20px rgba(0,0,0,0.04);
+      background: linear-gradient(120deg, #0b1a2e 0%, var(--accent-color, #2d9b7a) 50%, #0b1a2e 100%);
+      background-size: 200% 100%;
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      animation: shimmerTitle 5s infinite linear;
+      flex-shrink: 0;
+    }
+
+    @keyframes shimmerTitle {
+      0% { background-position: -200% 0; }
+      100% { background-position: 200% 0; }
+    }
+
+    .slide[data-index="0"] .slide-title {
+      font-size: 3rem;
+      background: linear-gradient(135deg, #0b1a2e 0%, #2d9b7a 60%, #1a6b4f 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      padding-bottom: 12px;
+      position: relative;
+      animation: shimmerTitle 8s infinite linear;
+    }
+    .slide[data-index="0"] .slide-title::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100px;
+      height: 5px;
+      background: linear-gradient(90deg, #2d9b7a, #1a6b4f);
+      border-radius: 4px;
+      animation: expandLine 3s infinite alternate ease-in-out;
+      box-shadow: 0 0 20px rgba(45,155,122,0.3);
+    }
+
+    @keyframes expandLine {
+      0% { width: 60px; opacity: 0.6; }
+      100% { width: 200px; opacity: 1; }
+    }
+
+    .slide-subtitle {
+      font-size: 1.1rem;
+      font-weight: 500;
+      color: #2a4b6b;
+      margin-bottom: 16px;
+      border-left: 4px solid var(--accent-color, #2d9b7a);
+      padding-left: 16px;
+      z-index: 1;
+      text-shadow: 0 1px 8px rgba(0,0,0,0.02);
+      flex-shrink: 0;
+    }
+
+    .highlight-box {
+      background: rgba(255, 255, 255, 0.5);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 18px;
+      padding: 16px 22px;
+      border-left: 5px solid var(--accent-color, #2d9b7a);
+      margin: 6px 0 4px;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.02);
+      transform-style: preserve-3d;
+    }
+    .highlight-box:hover {
+      transform: translateY(-4px) scale(1.01) rotateX(1deg);
+      box-shadow: 0 14px 28px -8px rgba(0,0,0,0.10);
+    }
+    .highlight-box::after {
+      content: '';
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: radial-gradient(circle, rgba(255,255,255,0.3), transparent 60%);
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    .highlight-box:hover::after {
+      opacity: 1;
+    }
+    .highlight-box p {
+      font-size: 1rem;
+    }
+    .highlight-box ul {
+      font-size: 0.95rem;
+      padding-left: 22px;
+    }
+    .highlight-box li {
+      margin-bottom: 3px;
+    }
+
+    .key-message {
+      background: rgba(255, 255, 255, 0.4);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border-radius: 60px;
+      padding: 12px 26px;
+      font-weight: 700;
+      color: var(--accent-color, #0b4b3a);
+      display: inline-block;
+      align-self: flex-start;
+      margin-top: 8px;
+      font-size: 1rem;
+      border: 1px solid rgba(255, 255, 255, 0.6);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.04), 0 0 30px var(--accent-color-light, rgba(45,155,122,0.05));
+      transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease;
+    }
+    .key-message:hover {
+      transform: translateY(-3px) scale(1.02);
+      box-shadow: 0 12px 32px -8px rgba(0,0,0,0.10), 0 0 50px var(--accent-color-light, rgba(45,155,122,0.1));
+    }
+    .key-message i {
+      margin-right: 10px;
+      color: var(--accent-color, #1a6b4f);
+    }
+
+    .card {
+      background: rgba(255, 255, 255, 0.6);
+      backdrop-filter: blur(6px);
+      -webkit-backdrop-filter: blur(6px);
+      border-radius: 18px;
+      padding: 16px 20px;
+      border-left: 4px solid var(--accent-color, #2d9b7a);
+      transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.4s ease, background 0.4s ease;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.02);
+      transform-style: preserve-3d;
+      perspective: 800px;
+      position: relative;
+      overflow: hidden;
+    }
+    .card:hover {
+      transform: translateY(-5px) scale(1.01) rotateY(2deg);
+      box-shadow: 0 14px 28px -8px rgba(0,0,0,0.10);
+      background: rgba(255, 255, 255, 0.85);
+    }
+    .card::after {
+      content: '';
+      position: absolute;
+      top: -30%;
+      right: -30%;
+      width: 90px;
+      height: 90px;
+      background: radial-gradient(circle, var(--accent-color-light, rgba(45,155,122,0.1)), transparent 70%);
+      border-radius: 50%;
+      pointer-events: none;
+      transition: transform 0.6s ease;
+    }
+    .card:hover::after {
+      transform: scale(2.5);
+    }
+    .card h4 {
+      font-weight: 700;
+      color: var(--accent-color, #0b4b3a);
+      margin-bottom: 4px;
+      font-size: 1.05rem;
+    }
+    .card ul {
+      font-size: 0.95rem;
+      padding-left: 20px;
+      margin: 2px 0;
+    }
+    .card p {
+      font-size: 0.95rem;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin: 8px 0;
+      border-radius: 18px;
+      border: 1px solid rgba(255, 255, 255, 0.3);
+      box-shadow: 0 4px 16px rgba(0,0,0,0.02);
+      background: rgba(255, 255, 255, 0.3);
+      backdrop-filter: blur(4px);
+      -webkit-backdrop-filter: blur(4px);
+      transition: box-shadow 0.3s ease;
+    }
+    .table-wrap:hover {
+      box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+    }
+
+    .comparison-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.85rem;
+      min-width: 540px;
+    }
+
+    .comparison-table th {
+      background: rgba(11, 26, 46, 0.9);
+      backdrop-filter: blur(4px);
+      color: white;
+      font-weight: 700;
+      padding: 12px 16px;
+      text-align: left;
+      font-size: 0.85rem;
+      border-bottom: 2px solid rgba(255,255,255,0.1);
+    }
+
+    .comparison-table td {
+      padding: 12px 16px;
+      border-bottom: 1px solid rgba(0,0,0,0.04);
+      vertical-align: top;
+      font-size: 0.8rem;
+      transition: background 0.2s ease;
+    }
+
+    .comparison-table tr:nth-child(even) td {
+      background: rgba(255, 255, 255, 0.2);
+    }
+    .comparison-table tr:last-child td {
+      border-bottom: none;
+    }
+    .comparison-table tr:hover td {
+      background: rgba(255, 255, 255, 0.4);
+    }
+
+    .progress-bar-container {
+      width: 100%;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 4px;
+      margin-top: 10px;
+      overflow: hidden;
+      position: relative;
+      z-index: 2;
+      box-shadow: inset 0 1px 4px rgba(0,0,0,0.1);
+    }
+    .progress-bar {
+      height: 100%;
+      width: 8.33%;
+      background: linear-gradient(90deg, #2d9b7a, #1a6b4f, #2d9b7a);
+      background-size: 200% 100%;
+      border-radius: 4px;
+      transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      animation: progressGlow 2s infinite alternate ease-in-out;
+      box-shadow: 0 0 20px rgba(45,155,122,0.3);
+    }
+
+    @keyframes progressGlow {
+      0% { box-shadow: 0 0 10px rgba(45,155,122,0.2); }
+      100% { box-shadow: 0 0 30px rgba(45,155,122,0.6); }
+    }
+
+    .controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 16px 10px 6px;
+      color: rgba(255, 255, 255, 0.9);
+      position: relative;
+      z-index: 2;
+    }
+
+    .controls .page-indicator {
+      font-size: 1rem;
+      font-weight: 700;
+      background: rgba(255, 255, 255, 0.06);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      padding: 8px 24px;
+      border-radius: 40px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      letter-spacing: 0.06em;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+    .page-indicator:hover {
+      background: rgba(255, 255, 255, 0.1);
+      transform: scale(1.02);
+    }
+
+    .controls .nav-buttons {
+      display: flex;
+      gap: 14px;
+    }
+
+    .controls button {
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(8px);
+      -webkit-backdrop-filter: blur(8px);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      color: white;
+      width: 48px;
+      height: 48px;
+      border-radius: 40px;
+      font-size: 1.2rem;
+      cursor: pointer;
+      transition: all 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.1);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .controls button::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(circle at center, rgba(45,155,122,0.3), transparent 70%);
+      opacity: 0;
+      transition: opacity 0.4s ease;
+    }
+    .controls button:hover:not(:disabled)::after {
+      opacity: 1;
+    }
+
+    .controls button:hover:not(:disabled) {
+      background: rgba(45, 155, 122, 0.25);
+      border-color: #2d9b7a;
+      transform: scale(1.06) translateY(-2px);
+      box-shadow: 0 8px 32px rgba(45,155,122,0.2);
+    }
+
+    .controls button:disabled {
+      opacity: 0.15;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .dots {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      padding: 12px 0 4px;
+      position: relative;
+      z-index: 2;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 20px;
+      background: rgba(255, 255, 255, 0.15);
+      transition: all 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+      cursor: pointer;
+      position: relative;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .dot.active {
+      background: #2d9b7a;
+      width: 34px;
+      box-shadow: 0 0 24px rgba(45, 155, 122, 0.6), 0 0 60px rgba(45, 155, 122, 0.2);
+      border-color: #2d9b7a;
+    }
+
+    .dot:hover {
+      transform: scale(1.3);
+      background: rgba(255, 255, 255, 0.3);
+    }
+
+    .card-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin: 8px 0;
+    }
+    @media (max-width: 768px) {
+      .card-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+    }
+
+    /* Estilos específicos para el FAQ (revelado progresivo) */
+    .faq-item {
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    .faq-item.animate-item {
+      /* ya tiene animación de entrada definida arriba, la reutilizamos */
+    }
+    #nextFaqBtn {
+      background: rgba(45,155,122,0.15);
+      backdrop-filter: blur(8px);
+      border: 2px solid #2d9b7a;
+      color: #0b4b3a;
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 10px 28px;
+      border-radius: 40px;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      font-family: 'Inter', sans-serif;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+    }
+    #nextFaqBtn:hover:not(:disabled) {
+      background: rgba(45,155,122,0.3);
+      transform: scale(1.03);
+      box-shadow: 0 8px 24px rgba(45,155,122,0.2);
+    }
+    #nextFaqBtn:disabled {
+      opacity: 0.6;
+      cursor: default;
+    }
+
+    @media (max-width: 1024px) {
+      .slide {
+        padding: 32px 36px 38px;
+        min-height: 520px;
+      }
+      .slide-title {
+        font-size: 2rem;
+      }
+      .slide[data-index="0"] .slide-title {
+        font-size: 2.6rem;
+      }
+      .slide-body {
+        font-size: 0.95rem;
+      }
+      .slide .slide-number {
+        font-size: 6.5rem;
+      }
+      .comparison-table {
+        font-size: 0.8rem;
+        min-width: 500px;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .presentation-wrapper {
+        padding: 14px;
+      }
+      .slide {
+        padding: 26px 22px 30px;
+        min-height: 460px;
+      }
+      .slide[data-index="0"] .slide-title {
+        font-size: 2.2rem;
+      }
+      .slide-title {
+        font-size: 1.6rem;
+      }
+      .slide-subtitle {
+        font-size: 0.95rem;
+      }
+      .slide-body {
+        font-size: 0.9rem;
+      }
+      .card-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
+      }
+      .controls button {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+      }
+      .slide .slide-number {
+        font-size: 5rem;
+        bottom: 12px;
+        right: 18px;
+      }
+      .comparison-table {
+        font-size: 0.75rem;
+        min-width: 420px;
+      }
+      .logo-slide {
+        top: 12px;
+        right: 14px;
+        padding: 6px 12px 6px 10px;
+        gap: 6px;
+      }
+      .logo-slide .logo-icon {
+        font-size: 1.2rem;
+      }
+      .logo-slide .logo-text .main {
+        font-size: 0.7rem;
+      }
+      .logo-slide .logo-text .sub {
+        font-size: 0.5rem;
+      }
+      #nextFaqBtn {
+        font-size: 0.9rem;
+        padding: 8px 20px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .slide {
+        padding: 20px 16px 24px;
+        min-height: 380px;
+      }
+      .slide[data-index="0"] .slide-title {
+        font-size: 1.8rem;
+      }
+      .slide-title {
+        font-size: 1.3rem;
+      }
+      .slide-icon {
+        font-size: 2rem;
+      }
+      .slide-body {
+        font-size: 0.85rem;
+      }
+      .comparison-table {
+        font-size: 0.65rem;
+        min-width: 340px;
+      }
+      .controls .page-indicator {
+        font-size: 0.75rem;
+        padding: 4px 14px;
+      }
+      .controls button {
+        width: 34px;
+        height: 34px;
+        font-size: 0.8rem;
+      }
+      .slide .slide-number {
+        font-size: 3.5rem;
+        bottom: 8px;
+        right: 12px;
+      }
+      .logo-slide {
+        top: 8px;
+        right: 10px;
+        padding: 4px 10px 4px 8px;
+        gap: 4px;
+      }
+      .logo-slide .logo-icon {
+        font-size: 1rem;
+      }
+      .logo-slide .logo-text .main {
+        font-size: 0.6rem;
+      }
+      .logo-slide .logo-text .sub {
+        font-size: 0.45rem;
+      }
+      #nextFaqBtn {
+        font-size: 0.8rem;
+        padding: 6px 16px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Canvas para partículas de fondo -->
+  <canvas id="particles-canvas"></canvas>
+
+  <!-- Canvas para burbujas -->
+  <canvas id="bubbles-canvas"></canvas>
+
+  <!-- Onda de fondo SVG -->
+  <svg class="bg-wave" viewBox="0 0 1440 320" preserveAspectRatio="none">
+    <path fill="rgba(45,155,122,0.3)" d="M0,192L48,176C96,160,192,128,288,138.7C384,149,480,203,576,213.3C672,224,768,192,864,181.3C960,171,1056,181,1152,192C1248,203,1344,213,1392,218.7L1440,224L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path>
+  </svg>
+
+  <div class="presentation-wrapper">
+    <div class="slides-container" id="slidesContainer">
+      <div id="transitionOverlay"></div>
+
+      <div class="slides-track" id="slidesTrack">
+
+        <!-- ================= SLIDE 1 ================= -->
+        <div class="slide active" data-index="0" style="--accent-color: #2d9b7a; --accent-color-light: rgba(45,155,122,0.15);">
+          <div class="logo-slide">
+            <i class="fas fa-bolt logo-icon"></i>
+            <div class="logo-text">
+              <span class="main">ENLAZA</span>
+              <span class="sub">Grupo Energía Bogotá</span>
+            </div>
+          </div>
+          <span class="slide-number">01</span>
+          <div class="slide-particles">
+            <span class="slide-particle" style="width:70px;height:70px;top:5%;left:5%;animation-delay:0s;"></span>
+            <span class="slide-particle" style="width:45px;height:45px;bottom:10%;right:10%;animation-delay:2s;"></span>
+            <span class="slide-particle" style="width:90px;height:90px;top:60%;left:80%;animation-delay:4s;"></span>
+            <span class="slide-particle" style="width:35px;height:35px;top:20%;right:30%;animation-delay:1s;"></span>
+          </div>
+          <span class="slide-tag animate-item"><i class="fas fa-gavel"></i> &nbsp;Recurso ANLA</span>
+          <div class="slide-icon animate-item"><i class="fas fa-balance-scale"></i></div>
+          <div class="slide-title animate-item">Recurso frente a la exclusión de predios con restitución de tierras</div>
+          <div class="slide-subtitle animate-item">Resolución ANLA 001269 de 2026 · Proyecto UPME 01-2013 — ENLAZA GEB</div>
+          <div class="slide-body">
+            <p class="animate-item" style="font-size:1.1rem; font-weight:500; color:#1a4b3a;"><i class="fas fa-bullseye" style="color:#2d9b7a; margin-right:12px;"></i>Objetivo de la cápsula</p>
+            <p class="animate-item">Explicar cuál era la posición inicial de ANLA, qué argumentó ENLAZA GEB, cómo cambió la decisión y cómo quedó finalmente la regla aplicable.</p>
+            <div class="animate-item" style="margin-top:auto; display:flex; gap:14px; flex-wrap:wrap; padding-top:16px;">
+              <span style="background:rgba(255,255,255,0.5); backdrop-filter:blur(4px); border-radius:30px; padding:8px 20px; font-size:0.85rem; font-weight:600; color:#1a6b4f; border:1px solid rgba(255,255,255,0.3);"><i class="fas fa-arrow-right"></i> 12 diapositivas</span>
+              <span style="background:rgba(255,255,255,0.5); backdrop-filter:blur(4px); border-radius:30px; padding:8px 20px; font-size:0.85rem; font-weight:600; color:#1a6b4f; border:1px solid rgba(255,255,255,0.3);"><i class="fas fa-balance-scale"></i> Análisis jurídico</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= SLIDE 2 ================= -->
+        <div class="slide" data-index="1" style="--accent-color: #b98a2b; --accent-color-light: rgba(185,138,43,0.15);">
+          <div class="logo-slide">
+            <i class="fas fa-bolt logo-icon"></i>
+            <div class="logo-text">
+              <span class="main">ENLAZA</span>
+              <span class="sub">Grupo Energía Bogotá</span>
+            </div>
+          </div>
+          <span class="slide-number">02</span>
+          <div class="slide-particles">
+            <span class="slide-particle" style="width:55px;height:55px;top:20%;left:80%;animation-delay:1s;"></span>
+            <span class="slide-particle" style="width:35px;height:35px;bottom:15%;left:10%;animation-delay:3s;"></span>
+            <span class="slide-particle" style="width:65px;height:65px;top:50%;left:20%;animation-delay:0.5s;"></span>
+          </div>
+          <span class="slide-tag animate-item"><i class="fas fa-question-circle"></i> Contexto</span>
+          <div class="slide-icon animate-item"><i class="fas fa-exclamation-triangle"></i></div>
+          <div class="slide-title animate-item">¿Cuál era el problema?</div>
+          <div class="slide-body">
+            <p class="animate-item">ANLA había incluido dentro de la zonificación de manejo ambiental una regla según la cual los <strong>predios con orden judicial favorable y en firme de restitución de tierras</strong> debían tratarse como <strong>áreas de exclusión</strong>.</p>
+            <div class="highlight-box animate-item">
+              <p><strong><i class="fas fa-times-circle" style="color:#b13e3e;"></i> Implicación práctica</strong></p>
+              <ul>
+                <li>La regla impedía la intervención de esos predios dentro del proyecto.</li>
+                <li>La exclusión aplicaba por la sola existencia de una orden judicial de restitución.</li>
+                <li>No se contemplaban mecanismos de intervención condicionada.</li>
+                <li>Para un proyecto lineal de transmisión eléctrica, esto generaba una restricción operativa relevante.</li>
+              </ul>
+            </div>
+            <div class="key-message animate-item"><i class="fas fa-lightbulb"></i> La discusión no era si debía protegerse la restitución, sino si esa protección exigía una prohibición absoluta o podía armonizarse.</div>
+          </div>
+        </div>
+
+        <!-- ================= SLIDE 3 ================= -->
+        <div class="slide" data-index="2" style="--accent-color: #b13e3e; --accent-color-light: rgba(177,62,62,0.15);">
+          <div class="logo-slide">
+            <i class="fas fa-bolt logo-icon"></i>
+            <div class="logo-text">
+              <span class="main">ENLAZA</span>
+              <span class="sub">Grupo Energía Bogotá</span>
+            </div>
+          </div>
+          <span class="slide-number">03</span>
+          <div class="slide-particles">
+            <span class="slide-particle" style="width:65px;height:65px;top:60%;left:5%;animation-delay:0.5s;"></span>
+            <span class="slide-particle" style="width:40px;height:40px;top:10%;right:15%;animation-delay:2.5s;"></span>
+          </div>
+          <span class="slide-tag animate-item"><i class="fas fa-flag"></i> Posición inicial</span>
+          <div class="slide-icon animate-item"><i class="fas fa-ban"></i></div>
+          <div class="slide-title animate-item">Regla inicial: exclusión absoluta</div>
+          <div class="slide-body">
+            <p class="animate-item">La ANLA estableció como área de exclusión los predios respecto de los cuales existiera una orden judicial favorable y en firme que dispusiera su destinación para procesos de restitución de tierras.</p>
+            <div class="card-grid animate-item">
+              <div class="card" style="border-left-color:#b13e3e;">
+                <h4><i class="fas fa-gavel"></i> Fundamento</h4>
+                <ul>
+                  <li>Ley 1448 de 2011</li>
+                  <li>Derechos fundamentales al territorio</li>
+                  <li>Protección propiedad privada</li>
+                  <li>Atención a poblaciones vulnerables</li>
+                </ul>
+              </div>
+              <div class="card" style="border-left-color:#b13e3e; background:rgba(240,234,232,0.5);">
+                <h4><i class="fas fa-ban"></i> Efecto</h4>
+                <p style="font-weight:700; font-size:1.15rem;">Predio con sentencia = área de exclusión</p>
+                <p style="font-size:0.9rem;">No había excepción para consentimiento ni servidumbre eléctrica.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= SLIDE 4 ================= -->
+        <div class="slide" data-index="3" style="--accent-color: #1a6b4f; --accent-color-light: rgba(26,107,79,0.15);">
+          <div class="logo-slide">
+            <i class="fas fa-bolt logo-icon"></i>
+            <div class="logo-text">
+              <span class="main">ENLAZA</span>
+              <span class="sub">Grupo Energía Bogotá</span>
+            </div>
+          </div>
+          <span class="slide-number">04</span>
+          <div class="slide-particles">
+            <span class="slide-particle" style="width:50px;height:50px;top:30%;right:10%;animation-delay:0.8s;"></span>
+            <span class="slide-particle" style="width:32px;height:32px;bottom:20%;left:20%;animation-delay:3.2s;"></span>
+          </div>
+          <span class="slide-tag animate-item"><i class="fas fa-bullhorn"></i> Tesis de ENLAZA GEB</span>
+          <div class="slide-icon animate-item"><i class="fas fa-handshake"></i></div>
+          <div class="slide-title animate-item">La exclusión absoluta era desproporcionada</div>
+          <div class="slide-body">
+            <p class="animate-item">ENLAZA GEB sostuvo que la decisión de ANLA debía modificarse porque la exclusión absoluta de estos predios era:</p>
+            <ul class="animate-item">
+              <li><strong>Desproporcionada</strong> para un proyecto de transmisión eléctrica.</li>
+              <li><strong>Carente de motivación técnica y jurídica suficiente</strong>.</li>
+              <li>Incompatible con la posibilidad de armonizar restitución de tierras e interés general.</li>
+              <li>Contraria a la naturaleza de la servidumbre legal de conducción de energía eléctrica.</li>
+            </ul>
+            <div class="key-message animate-item"><i class="fas fa-handshake"></i> La restitución debía protegerse, pero no mediante una regla automática que hiciera inviable la intervención aun cuando existieran mecanismos legales adecuados.</div>
+          </div>
+        </div>
+
+        <!-- ================= SLIDE 5 ================= -->
+        <div class="slide" data-index="4" style="--accent-color: #b98a2b; --accent-color-light: rgba(185,138,43,0.15);">
+          <div class="logo-slide">
+            <i class="fas fa-bolt logo-icon"></i>
+            <div class="logo-text">
+              <span class="main">ENLAZA</span>
+              <span class="sub">Grupo Energía Bogotá</span>
+            </div>
+          </div>
+          <span class="slide-number">05</span>
+          <div class="slide-particles">
+            <span class="slide-particle" style="width:60px;height:60px;top:70%;right:5%;animation-delay:1.2s;"></span>
+            <span class="slide-particle" style="width:38px;height:38px;top:15%;left:10%;animation-delay:2.8s;"></span>
+          </div>
+          <span class="slide-tag animate-item"><i class="fas fa-scale-balanced"></i> Argumento 1</span>
+          <div class="slide-icon animate-item"><i class="fas fa-weight-scale"></i></div>
+          <div class="slide-title animate-item">Falta de ponderación suficiente</div>
+          <div class="slide-body">
+            <p class="animate-item">ENLAZA GEB argumentó que la decisión no ponderaba adecuadamente los intereses constitucionales en tensión:</p>
+            <div class="card-grid animate-item">
+              <div class="card" style="border-left-color:#1a6b4f;">
+                <h4><i class="fas fa-users"></i> Protección</h4>
+                <ul>
+                  <li>Víctimas y restitución</li>
+                  <li>Reparación integral</li>
+                </ul>
+              </div>
+              <div class="card" style="border-left-color:#1a4b6b;">
+                <h4><i class="fas fa-bolt"></i> Interés general</h4>
+                <ul>
+                  <li>Servicio público esencial</li>
+                  <li>Utilidad pública e interés social</li>
+                  <li>Seguridad jurídica y viabilidad del trazado</li>
+                </ul>
+              </div>
+            </div>
+            <div class="highlight-box animate-item" style="border-left-color:#b98a2b; background:rgba(244,242,231,0.5);">
+              <p><strong>Punto central:</strong> La exclusión se adoptó como regla general, sin analizar si la intervención concreta del proyecto afectaba materialmente el goce del derecho restituido.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= SLIDE 6 ================= -->
+        <div class="slide" data-index="5" style="--accent-color: #1a6b4f; --accent-color-light: rgba(26,107,79,0.15);">
+          <div class="logo-slide">
+            <i class="fas fa-bolt logo-icon"></i>
+            <div class="logo-text">
+              <span class="main">ENLAZA</span>
+              <span class="sub">Grupo Energía Bogotá</span>
+            </div>
+          </div>
+          <span class="slide-number">06</span>
+          <div class="slide-particles">
+            <span class="slide-particle" style="width:45px;height:45px;top:40%;left:85%;animation-delay:0.3s;"></span>
+            <span class="slide-particle" style="width:28px;height:28px;bottom:30%;left:5%;animation-delay:2.1s;"></span>
+          </div>
+          <span class="slide-tag animate-item"><i class="fas fa-bolt"></i> Argumento 2</span>
+          <div class="slide-icon animate-item"><i class="fas fa-link"></i></div>
+          <div class="slide-title animate-item">Servidumbre eléctrica y restitución pueden coexistir</div>
+          <div class="slide-body">
+            <p class="animate-item">ENLAZA GEB sostuvo que la servidumbre legal de conducción de energía eléctrica:</p>
+            <ul class="animate-item">
+              <li>No implica transferencia del dominio.</li>
+              <li>No priva al beneficiario restituido de la propiedad del predio.</li>
+              <li>Constituye una limitación específica al uso.</li>
+              <li>Puede ser compatible con actividades productivas y con la finalidad de la restitución.</li>
+              <li>Cuenta con un procedimiento judicial propio bajo la Ley 56 de 1981.</li>
+            </ul>
+            <div class="key-message animate-item"><i class="fas fa-link"></i> La intervención mediante servidumbre no equivale a desconocer la restitución; puede ser un mecanismo para armonizar ambos intereses.</div>
+          </div>
+        </div>
+
+        <!-- ================= SLIDE 7 ================= -->
+        <div class="slide" data-index="6" style="--accent-color: #2d5b8a; --accent-color-light: rgba(45,91,138,0.15);">
+          <div class="logo-slide">
+            <i class="fas fa-bolt logo-icon"></i>
+            <div class="logo-text">
+              <span class="main">ENLAZA</span>
+              <span class="sub">Grupo Energía Bogotá</span>
+            </div>
+          </div>
+          <span class="slide-number">07</span>
+          <div class="slide-particles">
+            <span class="slide-particle" style="width:55px;height:55px;top:10%;right:20%;animation-delay:0.7s;"></span>
+            <span class="slide-particle" style="width:35px;height:35px;bottom:5%;left:15%;animation-delay:2.9s;"></span>
+          </div>
+          <span class="slide-tag animate-item"><i class="fas fa-file-signature"></i> Pretensiones</span>
+          <div class="slide-icon animate-item"><i class="fas fa-pen-to-square"></i></div>
+          <div class="slide-title animate-item">Qué pedimos en el recurso</div>
+          <div class="slide-body">
+            <div class="card-grid animate-item">
+              <div class="card" style="border-left-color:#1a6b4f;">
+                <h4><i class="fas fa-chevron-circle-up"></i> Petición principal</h4>
+                <p>Revocar el numeral que clasificaba los predios con sentencia de restitución como áreas de exclusión, por tratarse de una medida desproporcionada y sin motivación suficiente.</p>
+              </div>
+              <div class="card" style="border-left-color:#b98a2b;">
+                <h4><i class="fas fa-chevron-circle-down"></i> Petición subsidiaria</h4>
+                <p>Modificar la medida para que estos predios no fueran tratados como exclusión absoluta, sino como áreas susceptibles de intervención condicionada.</p>
+                <ul>
+                  <li>Consentimiento previo, expreso y documentado del beneficiario restituido.</li>
+                  <li>O imposición judicial de servidumbre conforme a la Ley 56 de 1981.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="key-message animate-item"><i class="fas fa-gavel"></i> Si ANLA no revocaba la exclusión, al menos debía reconocer mecanismos jurídicos que permitieran intervenir sin desconocer los derechos del beneficiario restituido.</div>
+          </div>
+        </div>
+
+        <!-- ================= SLIDE 8 ================= -->
+        <div class="slide" data-index="7" style="--accent-color: #b13e3e; --accent-color-light: rgba(177,62,62,0.15);">
+          <div class="logo-slide">
+            <i class="fas fa-bolt logo-icon"></i>
+            <div class="logo-text">
+              <span class="main">ENLAZA</span>
+              <span class="sub">Grupo Energía Bogotá</span>
+            </div>
+          </div>
+          <span class="slide-number">08</span>
+          <div class="slide-particles">
+            <span class="slide-particle" style="width:65px;height:65px;top:50%;left:10%;animation-delay:1.5s;"></span>
+            <span class="slide-particle" style="width:28px;height:28px;top:20%;right:5%;animation-delay:3.5s;"></span>
+          </div>
+          <span class="slide-tag animate-item"><i class="fas fa-arrows-spin"></i> Cambio de posición</span>
+          <div class="slide-icon animate-item"><i class="fas fa-arrow-right-arrow-left"></i></div>
+          <div class="slide-title animate-item">ANLA flexibilizó la exclusión</div>
+          <div class="slide-body">
+            <p class="animate-item">La ANLA no eliminó por completo la categoría de área de exclusión, pero sí modificó su alcance.</p>
+            <div class="card-grid animate-item">
+              <div class="card" style="border-left-color:#b13e3e; background:rgba(244,234,234,0.5);">
+                <h4>Antes</h4>
+                <p style="font-weight:700; font-size:1.05rem;">Predio con orden = exclusión absoluta</p>
+              </div>
+              <div class="card" style="border-left-color:#2d9b7a; background:rgba(227,240,234,0.5);">
+                <h4>Después</h4>
+                <p style="font-weight:700; font-size:1.05rem;">Exclusión con dos excepciones</p>
+              </div>
+            </div>
+            <div class="highlight-box animate-item">
+              <p><strong>Excepciones reconocidas</strong></p>
+              <ol>
+                <li>Consentimiento expreso del beneficiario restituido, debidamente soportado.</li>
+                <li>Proceso judicial de imposición de servidumbre conforme a la Ley 56 de 1981.</li>
+              </ol>
+            </div>
+            <div class="key-message animate-item"><i class="fas fa-arrow-right"></i> El cambio consistió en pasar de una prohibición cerrada a una exclusión con válvulas jurídicas de viabilidad.</div>
+          </div>
+        </div>
+
+        <!-- ================= SLIDE 9 ================= -->
+        <div class="slide" data-index="8" style="--accent-color: #2d5b8a; --accent-color-light: rgba(45,91,138,0.15);">
+          <div class="logo-slide">
+            <i class="fas fa-bolt logo-icon"></i>
+            <div class="logo-text">
+              <span class="main">ENLAZA</span>
+              <span class="sub">Grupo Energía Bogotá</span>
+            </div>
+          </div>
+          <span class="slide-number">09</span>
+          <div class="slide-particles">
+            <span class="slide-particle" style="width:50px;height:50px;top:70%;right:15%;animation-delay:0.4s;"></span>
+            <span class="slide-particle" style="width:32px;height:32px;top:5%;left:30%;animation-delay:2.6s;"></span>
+          </div>
+          <span class="slide-tag animate-item"><i class="fas fa-arrow-left-arrow-right"></i> Antes y después</span>
+          <div class="slide-icon animate-item"><i class="fas fa-table"></i></div>
+          <div class="slide-title animate-item">¿En qué cambió la decisión?</div>
+          <div class="slide-body">
+            <div class="table-wrap animate-item">
+              <table class="comparison-table">
+                <thead>
+                  <tr><th>Tema</th><th>Posición inicial ANLA</th><th>Argumento ENLAZA</th><th>Decisión final</th></tr>
+                </thead>
+                <tbody>
+                  <tr><td><strong>Tratamiento predios restituidos</strong></td><td>Área de exclusión absoluta</td><td>No debía haber exclusión automática</td><td>Se mantiene exclusión, con excepciones</td></tr>
+                  <tr><td><strong>Intervención del proyecto</strong></td><td>No permitida</td><td>Debía permitirse intervención condicionada</td><td>Permitida solo bajo dos escenarios excepcionales</td></tr>
+                  <tr><td><strong>Consentimiento del beneficiario</strong></td><td>No previsto</td><td>Debía respetarse la autonomía</td><td>Se acepta si es expreso y suficientemente soportado</td></tr>
+                  <tr><td><strong>Servidumbre eléctrica</strong></td><td>No prevista</td><td>Puede coexistir y tramitarse judicialmente</td><td>Se acepta si se cumple proceso judicial Ley 56/1981</td></tr>
+                  <tr><td><strong>Resultado práctico</strong></td><td>Prohibición cerrada</td><td>Armonización entre restitución e interés general</td><td>Exclusión flexible con mecanismos jurídicos</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= SLIDE 10 ================= -->
+        <div class="slide" data-index="9" style="--accent-color: #2d9b7a; --accent-color-light: rgba(45,155,122,0.15);">
+          <div class="logo-slide">
+            <i class="fas fa-bolt logo-icon"></i>
+            <div class="logo-text">
+              <span class="main">ENLAZA</span>
+              <span class="sub">Grupo Energía Bogotá</span>
+            </div>
+          </div>
+          <span class="slide-number">10</span>
+          <div class="slide-particles">
+            <span class="slide-particle" style="width:55px;height:55px;top:30%;left:5%;animation-delay:0.9s;"></span>
+            <span class="slide-particle" style="width:38px;height:38px;bottom:10%;right:25%;animation-delay:3.8s;"></span>
+          </div>
+          <span class="slide-tag animate-item"><i class="fas fa-check-double"></i> Regla final</span>
+          <div class="slide-icon animate-item"><i class="fas fa-gavel"></i></div>
+          <div class="slide-title animate-item">Cómo quedó la decisión</div>
+          <div class="slide-body">
+            <p class="animate-item" style="font-weight:600; font-size:1.05rem;">Los predios con orden judicial favorable y en firme destinada a restitución de tierras <span style="color:#b13e3e;">siguen siendo áreas de exclusión</span>.</p>
+            <p class="animate-item" style="margin-top:2px;">Sin embargo, la decisión final permite intervención excepcional en dos casos:</p>
+            <div class="card-grid animate-item">
+              <div class="card" style="border-left-color:#2d9b7a;">
+                <h4><i class="fas fa-file-signature"></i> Excepción 1</h4>
+                <p><strong>Consentimiento expreso</strong> del beneficiario restituido, previo a la intervención y suficientemente soportado.</p>
+              </div>
+              <div class="card" style="border-left-color:#1a4b6b;">
+                <h4><i class="fas fa-gavel"></i> Excepción 2</h4>
+                <p><strong>Proceso judicial de imposición de servidumbre</strong>, conforme a la Ley 56 de 1981.</p>
+              </div>
+            </div>
+            <div class="highlight-box animate-item" style="background:rgba(244,240,232,0.5); border-left-color:#b98a2b;">
+              <p><strong>Resultado:</strong> No hubo revocatoria total, pero sí una modificación relevante que permite gestionar jurídicamente la intervención de estos predios.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= SLIDE 11 ================= -->
+        <div class="slide" data-index="10" style="--accent-color: #b98a2b; --accent-color-light: rgba(185,138,43,0.15);">
+          <div class="logo-slide">
+            <i class="fas fa-bolt logo-icon"></i>
+            <div class="logo-text">
+              <span class="main">ENLAZA</span>
+              <span class="sub">Grupo Energía Bogotá</span>
+            </div>
+          </div>
+          <span class="slide-number">11</span>
+          <div class="slide-particles">
+            <span class="slide-particle" style="width:50px;height:50px;top:60%;left:80%;animation-delay:1.8s;"></span>
+            <span class="slide-particle" style="width:38px;height:38px;top:10%;left:20%;animation-delay:2.3s;"></span>
+          </div>
+          <span class="slide-tag animate-item"><i class="fas fa-chart-simple"></i> Balance</span>
+          <div class="slide-icon animate-item"><i class="fas fa-scale-balanced"></i></div>
+          <div class="slide-title animate-item">Resultado del recurso</div>
+          <div class="slide-body">
+            <div class="card-grid animate-item">
+              <div class="card" style="border-left-color:#b13e3e; background:rgba(244,234,234,0.5);">
+                <h4><i class="fas fa-minus-circle"></i> Lo que ANLA mantuvo</h4>
+                <ul>
+                  <li>Protección reforzada de predios vinculados a restitución.</li>
+                  <li>Clasificación general como áreas de exclusión.</li>
+                  <li>Prevalencia de la reparación integral.</li>
+                </ul>
+              </div>
+              <div class="card" style="border-left-color:#2d9b7a; background:rgba(227,240,234,0.5);">
+                <h4><i class="fas fa-plus-circle"></i> Lo que ANLA cambió</h4>
+                <ul>
+                  <li>Reconoció que la exclusión no debía operar como prohibición absoluta.</li>
+                  <li>Incorporó el consentimiento del beneficiario como mecanismo habilitante.</li>
+                  <li>Incorporó la servidumbre judicial de energía eléctrica como mecanismo habilitante.</li>
+                </ul>
+              </div>
+            </div>
+            <div class="highlight-box animate-item" style="background:rgba(234,244,240,0.5); border-left-color:#1a6b4f;">
+              <p><strong><i class="fas fa-bullseye"></i> Lectura estratégica</strong></p>
+              <p>La decisión recoge parcialmente la petición subsidiaria de ENLAZA GEB y abre una ruta de viabilidad para el proyecto frente a predios restituidos.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= SLIDE 12 ================= -->
+        <div class="slide" data-index="11" style="--accent-color: #1a6b4f; --accent-color-light: rgba(26,107,79,0.15);">
+          <div class="logo-slide">
+            <i class="fas fa-bolt logo-icon"></i>
+            <div class="logo-text">
+              <span class="main">ENLAZA</span>
+              <span class="sub">Grupo Energía Bogotá</span>
+            </div>
+          </div>
+          <span class="slide-number">12</span>
+          <div class="slide-particles">
+            <span class="slide-particle" style="width:65px;height:65px;top:20%;right:10%;animation-delay:0.2s;"></span>
+            <span class="slide-particle" style="width:32px;height:32px;bottom:15%;left:30%;animation-delay:2.7s;"></span>
+          </div>
+          <span class="slide-tag animate-item"><i class="fas fa-flag-checkered"></i> Cierre</span>
+          <div class="slide-icon animate-item"><i class="fas fa-check-circle"></i></div>
+          <div class="slide-title animate-item">Mensaje final</div>
+          <div class="slide-body">
+            <p class="animate-item" style="font-size:1.2rem; font-weight:700; color:#0b4b3a;">El resultado fue <span style="background:rgba(212,232,224,0.6); backdrop-filter:blur(4px); padding:0 16px; border-radius:40px;">parcialmente favorable</span>.</p>
+            <p class="animate-item">ANLA mantuvo la protección reforzada de los predios restituidos como regla general, pero aceptó que esa protección <strong>no implica una prohibición absoluta</strong>.</p>
+            <p class="animate-item">A partir de los argumentos de ENLAZA GEB, la decisión final permite intervenir excepcionalmente esos predios cuando:</p>
+            <ol class="animate-item" style="font-weight:500; margin:4px 0 10px 24px;">
+              <li>Exista consentimiento expreso del beneficiario restituido; o</li>
+              <li>Se obtenga judicialmente la imposición de servidumbre eléctrica conforme a la Ley 56 de 1981.</li>
+            </ol>
+            <div class="animate-item" style="background:rgba(11,26,46,0.9); backdrop-filter:blur(8px); color:white; border-radius:60px; padding:16px 26px; margin-top:6px; text-align:center; font-size:1rem; font-weight:700; letter-spacing:0.02em; box-shadow:0 8px 32px rgba(0,0,0,0.3); border:1px solid rgba(255,255,255,0.05);">
+              <i class="fas fa-quote-left" style="color:#2d9b7a; margin-right:14px;"></i> Pasamos de una exclusión cerrada a una exclusión con mecanismos jurídicos de viabilidad para el proyecto.
+            </div>
+          </div>
+        </div>
+
+        <!-- ================= SLIDE 13 (PREGUNTAS CLAVE - REVELADO PROGRESIVO) ================= -->
+        <div class="slide" data-index="12" style="--accent-color: #1a6b4f; --accent-color-light: rgba(26,107,79,0.15);">
+          <div class="logo-slide">
+            <i class="fas fa-bolt logo-icon"></i>
+            <div class="logo-text">
+              <span class="main">ENLAZA</span>
+              <span class="sub">Grupo Energía Bogotá</span>
+            </div>
+          </div>
+          <span class="slide-number">13</span>
+          <div class="slide-particles">
+            <span class="slide-particle" style="width:60px;height:60px;top:15%;left:10%;animation-delay:0.3s;"></span>
+            <span class="slide-particle" style="width:40px;height:40px;bottom:20%;right:15%;animation-delay:2.1s;"></span>
+            <span class="slide-particle" style="width:80px;height:80px;top:50%;left:70%;animation-delay:4.5s;"></span>
+          </div>
+          <span class="slide-tag animate-item"><i class="fas fa-question-circle"></i> &nbsp;Preguntas frecuentes</span>
+          <div class="slide-icon animate-item"><i class="fas fa-comments"></i></div>
+          <div class="slide-title animate-item">Preguntas clave sobre la exclusión de predios</div>
+          <div class="slide-subtitle animate-item">ENLAZA GEB</div>
+
+          <div class="slide-body" id="faqContainer">
+
+            <!-- Pregunta 1 -->
+            <div class="faq-item highlight-box animate-item" data-step="1" style="border-left-color: #2d9b7a; display: none;">
+              <p><strong><i class="fas fa-chevron-circle-right" style="color:#2d9b7a; margin-right:8px;"></i>  ¿ANLA revocó la exclusión?</strong></p>
+              <p style="font-size:0.95rem; margin-top:4px;">.</p>
+            </div>
+
+            <!-- Pregunta 2 -->
+            <div class="faq-item highlight-box animate-item" data-step="2" style="border-left-color: #b98a2b; display: none;">
+              <p><strong><i class="fas fa-chevron-circle-right" style="color:#b98a2b; margin-right:8px;"></i> ¿Entonces el resultado fue favorable?</strong></p>
+              <p style="font-size:0.95rem; margin-top:4px;">.</p>
+            </div>
+
+            <!-- Pregunta 3 -->
+            <div class="faq-item highlight-box animate-item" data-step="3" style="border-left-color: #1a6b4f; display: none;">
+              <p><strong><i class="fas fa-chevron-circle-right" style="color:#1a6b4f; margin-right:8px;"></i>¿Cuáles son las dos excepciones?</strong></p>
+              <p style="font-size:0.95rem; margin-top:4px;">.</p>
+            </div>
+
+            <!-- Pregunta 4 -->
+            <div class="faq-item highlight-box animate-item" data-step="4" style="border-left-color: #2d5b8a; display: none;">
+              <p><strong><i class="fas fa-chevron-circle-right" style="color:#2d5b8a; margin-right:8px;"></i>¿Por qué es importante el consentimiento del beneficiario?</strong></p>
+              <p style="font-size:0.95rem; margin-top:4px;">.</p>
+            </div>
+             <!-- Pregunta 5 -->
+            <div class="faq-item highlight-box animate-item" data-step="5" style="border-left-color: #2d5b8a; display: none;">
+              <p><strong><i class="fas fa-chevron-circle-right" style="color:#2d5b8a; margin-right:8px;"></i>¿Por qué es importante la servidumbre judicial?</strong></p>
+              <p style="font-size:0.95rem; margin-top:4px;">.</p>
+            </div>
+             <!-- Pregunta 6 -->
+            <div class="faq-item highlight-box animate-item" data-step="6" style="border-left-color: #2d5b8a; display: none;">
+              <p><strong><i class="fas fa-chevron-circle-right" style="color:#2d5b8a; margin-right:8px;"></i> ¿Qué debe cuidar ENLAZA GEB en la aplicación de la decisión?</strong></p>
+              <p style="font-size:0.95rem; margin-top:4px;">.</p>
+            </div>
+
+            <!-- Mensaje final -->
+            <div class="faq-item key-message animate-item" data-step="5" style="display: none; margin-top:8px;">
+              <i class="fas fa-lightbulb"></i> Gracias
+            </div>
+
+            <!-- Botón -->
+            <div class="animate-item" style="margin-top: 12px; display: flex; justify-content: center;">
+              <button id="nextFaqBtn">
+                <i class="fas fa-arrow-right" style="margin-right: 10px;"></i> Siguiente pregunta
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+      </div><!-- /slides-track -->
+    </div><!-- /slides-container -->
+
+    <!-- Barra de progreso -->
+    <div class="progress-bar-container">
+      <div class="progress-bar" id="progressBar"></div>
+    </div>
+
+    <!-- CONTROLES -->
+    <div class="controls">
+      <div class="page-indicator" id="pageIndicator">1 / 13</div>
+      <div class="nav-buttons">
+        <button id="prevSlide" aria-label="Anterior"><i class="fas fa-chevron-left"></i></button>
+        <button id="nextSlide" aria-label="Siguiente"><i class="fas fa-chevron-right"></i></button>
+      </div>
+    </div>
+    <div class="dots" id="dotsContainer"></div>
+  </div>
+
+  <script>
+    (function() {
+      // ---- PARTÍCULAS 3D (fondo) ----
+      const canvasBg = document.getElementById('particles-canvas');
+      const ctxBg = canvasBg.getContext('2d');
+      let w, h;
+      const particlesBg = [];
+      const COUNT = 70;
+
+      function resizeCanvas() {
+        w = canvasBg.width = window.innerWidth;
+        h = canvasBg.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resizeCanvas);
+      resizeCanvas();
+
+      class ParticleBg {
+        constructor() {
+          this.x = Math.random() * w;
+          this.y = Math.random() * h;
+          this.size = Math.random() * 2.8 + 1.2;
+          this.speedX = (Math.random() - 0.5) * 0.35;
+          this.speedY = (Math.random() - 0.5) * 0.35;
+          this.opacity = Math.random() * 0.25 + 0.05;
+          this.hue = Math.random() * 60 + 160;
+        }
+        update() {
+          this.x += this.speedX;
+          this.y += this.speedY;
+          if (this.x < 0 || this.x > w) this.speedX *= -1;
+          if (this.y < 0 || this.y > h) this.speedY *= -1;
+        }
+        draw() {
+          ctxBg.beginPath();
+          ctxBg.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+          ctxBg.fillStyle = `hsla(${this.hue}, 70%, 60%, ${this.opacity})`;
+          ctxBg.fill();
+          ctxBg.shadowColor = `hsla(${this.hue}, 80%, 70%, 0.1)`;
+          ctxBg.shadowBlur = 15;
+          ctxBg.fill();
+          ctxBg.shadowBlur = 0;
+        }
+      }
+
+      for (let i = 0; i < COUNT; i++) {
+        particlesBg.push(new ParticleBg());
+      }
+
+      function animateParticlesBg() {
+        ctxBg.clearRect(0, 0, w, h);
+        particlesBg.forEach(p => {
+          p.update();
+          p.draw();
+        });
+        for (let i = 0; i < particlesBg.length; i++) {
+          for (let j = i + 1; j < particlesBg.length; j++) {
+            const dx = particlesBg[i].x - particlesBg[j].x;
+            const dy = particlesBg[i].y - particlesBg[j].y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < 180) {
+              ctxBg.beginPath();
+              ctxBg.moveTo(particlesBg[i].x, particlesBg[i].y);
+              ctxBg.lineTo(particlesBg[j].x, particlesBg[j].y);
+              const hue = (particlesBg[i].hue + particlesBg[j].hue) / 2;
+              ctxBg.strokeStyle = `hsla(${hue}, 60%, 70%, ${0.04 * (1 - dist/180)})`;
+              ctxBg.lineWidth = 0.5;
+              ctxBg.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(animateParticlesBg);
+      }
+      animateParticlesBg();
+
+      // ---- BURBUJAS ----
+      const canvasBubbles = document.getElementById('bubbles-canvas');
+      const ctxBubbles = canvasBubbles.getContext('2d');
+      let wB, hB;
+      const bubbles = [];
+
+      function resizeBubblesCanvas() {
+        wB = canvasBubbles.width = window.innerWidth;
+        hB = canvasBubbles.height = window.innerHeight;
+      }
+      window.addEventListener('resize', resizeBubblesCanvas);
+      resizeBubblesCanvas();
+
+      class Bubble {
+        constructor() {
+          this.reset();
+        }
+        reset() {
+          this.x = Math.random() * wB;
+          this.y = hB + 20 + Math.random() * 100;
+          this.radius = Math.random() * 18 + 7;
+          this.speedY = - (Math.random() * 1.0 + 0.5);
+          this.speedX = (Math.random() - 0.5) * 0.35;
+          this.opacity = Math.random() * 0.25 + 0.15;
+          this.color = `hsla(${Math.random() * 60 + 180}, 70%, 70%, `;
+          this.life = 1;
+          this.decay = 0.001 + Math.random() * 0.003;
+          this.wobble = Math.random() * Math.PI * 2;
+          this.wobbleSpeed = 0.02 + Math.random() * 0.03;
+        }
+        update() {
+          this.y += this.speedY;
+          this.x += this.speedX + Math.sin(this.wobble) * 0.3;
+          this.wobble += this.wobbleSpeed;
+          this.life -= this.decay;
+          this.radius *= 0.9995;
+
+          if (this.y < -40 || this.life <= 0 || this.radius < 1.5) {
+            this.reset();
+            this.y = hB + 20 + Math.random() * 100;
+            this.life = 1;
+          }
+        }
+        draw() {
+          const alpha = this.opacity * this.life;
+          ctxBubbles.beginPath();
+          ctxBubbles.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctxBubbles.fillStyle = this.color + alpha + ')';
+          ctxBubbles.fill();
+
+          ctxBubbles.beginPath();
+          ctxBubbles.arc(this.x - this.radius * 0.25, this.y - this.radius * 0.3, this.radius * 0.2, 0, Math.PI * 2);
+          ctxBubbles.fillStyle = `rgba(255,255,255,${alpha * 0.4})`;
+          ctxBubbles.fill();
+
+          ctxBubbles.beginPath();
+          ctxBubbles.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+          ctxBubbles.strokeStyle = `rgba(255,255,255,${alpha * 0.15})`;
+          ctxBubbles.lineWidth = 0.8;
+          ctxBubbles.stroke();
+        }
+      }
+
+      const NUM_BUBBLES = 35;
+      for (let i = 0; i < NUM_BUBBLES; i++) {
+        const b = new Bubble();
+        b.y = Math.random() * hB;
+        b.x = Math.random() * wB;
+        bubbles.push(b);
+      }
+
+      function animateBubbles() {
+        ctxBubbles.clearRect(0, 0, wB, hB);
+        bubbles.forEach(b => {
+          b.update();
+          b.draw();
+        });
+        requestAnimationFrame(animateBubbles);
+      }
+      animateBubbles();
+
+      // ---- SLIDES ----
+      const track = document.getElementById('slidesTrack');
+      const slides = track.querySelectorAll('.slide');
+      const total = slides.length;
+      let current = 0;
+      let isTransitioning = false;
+
+      const prevBtn = document.getElementById('prevSlide');
+      const nextBtn = document.getElementById('nextSlide');
+      const indicator = document.getElementById('pageIndicator');
+      const progressBar = document.getElementById('progressBar');
+      const dotsContainer = document.getElementById('dotsContainer');
+
+      const overlay = document.getElementById('transitionOverlay');
+
+      function goTo(index) {
+        if (isTransitioning) return;
+        if (index < 0 || index >= total) return;
+        if (index === current) return;
+
+        isTransitioning = true;
+        prevBtn.disabled = true;
+        nextBtn.disabled = true;
+
+        overlay.classList.remove('fade-out');
+        overlay.style.display = 'block';
+        void overlay.offsetHeight;
+        overlay.classList.add('active');
+
+        current = index;
+
+        indicator.textContent = `${current + 1} / ${total}`;
+        progressBar.style.width = `${((current + 1) / total) * 100}%`;
+        dots.forEach((dot, idx) => {
+          dot.classList.toggle('active', idx === current);
+        });
+        slides.forEach((slide, idx) => {
+          slide.classList.toggle('active', idx === current);
+        });
+
+        setTimeout(() => {
+          track.classList.add('no-transition');
+          track.style.transform = `translateX(-${current * 100}%)`;
+          void track.offsetHeight;
+          track.classList.remove('no-transition');
+
+          overlay.classList.remove('active');
+          overlay.classList.add('fade-out');
+
+          setTimeout(() => {
+            overlay.style.display = 'none';
+            overlay.classList.remove('fade-out');
+            isTransitioning = false;
+            prevBtn.disabled = current === 0;
+            nextBtn.disabled = current === total - 1;
+            track.style.transition = 'transform 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94)';
+          }, 600);
+        }, 500);
+      }
+
+      function updateUI() {
+        indicator.textContent = `${current + 1} / ${total}`;
+        progressBar.style.width = `${((current + 1) / total) * 100}%`;
+        dots.forEach((dot, idx) => {
+          dot.classList.toggle('active', idx === current);
+        });
+        prevBtn.disabled = current === 0 || isTransitioning;
+        nextBtn.disabled = current === total - 1 || isTransitioning;
+        slides.forEach((slide, idx) => {
+          slide.classList.toggle('active', idx === current);
+        });
+        track.style.transform = `translateX(-${current * 100}%)`;
+      }
+
+      // Crear dots
+      for (let i = 0; i < total; i++) {
+        const dot = document.createElement('span');
+        dot.classList.add('dot');
+        if (i === 0) dot.classList.add('active');
+        dot.dataset.index = i;
+        dot.addEventListener('click', () => {
+          if (!isTransitioning) goTo(i);
+        });
+        dotsContainer.appendChild(dot);
+      }
+      const dots = dotsContainer.querySelectorAll('.dot');
+
+      function next() {
+        if (current < total - 1 && !isTransitioning) goTo(current + 1);
+      }
+
+      function prev() {
+        if (current > 0 && !isTransitioning) goTo(current - 1);
+      }
+
+      prevBtn.addEventListener('click', prev);
+      nextBtn.addEventListener('click', next);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+          e.preventDefault();
+          next();
+        } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+          e.preventDefault();
+          prev();
+        }
+      });
+
+      updateUI();
+
+      // ---- LÓGICA DE PREGUNTAS PROGRESIVAS (para la diapositiva 13) ----
+      // Esperamos a que la diapositiva esté cargada
+      const faqContainer = document.getElementById('faqContainer');
+      if (faqContainer) {
+        const items = faqContainer.querySelectorAll('.faq-item');
+        const totalItems = items.length;
+        let currentStep = 0;
+
+        // Ocultar todos y mostrar el primero
+        items.forEach((item, index) => {
+          item.style.display = 'none';
+          item.classList.remove('animate-item');
+        });
+
+        if (items.length > 0) {
+          items[0].style.display = 'block';
+          items[0].classList.add('animate-item');
+          void items[0].offsetHeight;
+          items[0].style.opacity = '0';
+          items[0].style.transform = 'translateY(20px) scale(0.95)';
+          setTimeout(() => {
+            items[0].style.opacity = '1';
+            items[0].style.transform = 'translateY(0) scale(1)';
+          }, 50);
+          currentStep = 1;
+        }
+
+        const nextBtnFaq = document.getElementById('nextFaqBtn');
+        if (nextBtnFaq) {
+          nextBtnFaq.addEventListener('click', function() {
+            // Ocultar el actual
+            const currentItem = items[currentStep - 1];
+            if (currentItem) {
+              currentItem.style.opacity = '0';
+              currentItem.style.transform = 'translateY(-20px) scale(0.95)';
+              setTimeout(() => {
+                currentItem.style.display = 'none';
+              }, 300);
+            }
+
+            currentStep++;
+            if (currentStep > totalItems) {
+              // Finalizado
+              nextBtnFaq.innerHTML = '<i class="fas fa-check-circle" style="margin-right: 10px;"></i> Finalizado';
+              nextBtnFaq.style.borderColor = '#b98a2b';
+              nextBtnFaq.style.background = 'rgba(185,138,43,0.2)';
+              nextBtnFaq.style.color = '#7a5f1a';
+              nextBtnFaq.disabled = true;
+              nextBtnFaq.style.opacity = '0.6';
+              nextBtnFaq.style.cursor = 'default';
+              return;
+            }
+
+            const nextItem = items[currentStep - 1];
+            if (nextItem) {
+              nextItem.style.display = 'block';
+              nextItem.classList.add('animate-item');
+              nextItem.style.opacity = '0';
+              nextItem.style.transform = 'translateY(20px) scale(0.95)';
+              void nextItem.offsetHeight;
+              setTimeout(() => {
+                nextItem.style.opacity = '1';
+                nextItem.style.transform = 'translateY(0) scale(1)';
+              }, 50);
+            }
+
+            if (currentStep === totalItems) {
+              nextBtnFaq.innerHTML = '<i class="fas fa-check-circle" style="margin-right: 10px;"></i> Última pregunta';
+            } else {
+              nextBtnFaq.innerHTML = '<i class="fas fa-arrow-right" style="margin-right: 10px;"></i> Siguiente pregunta';
+            }
+          });
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
